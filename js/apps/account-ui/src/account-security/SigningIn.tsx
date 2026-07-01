@@ -92,11 +92,9 @@ export const SigningIn = () => {
   const { login } = context.keycloak;
 
   const [credentials, setCredentials] = useState<CredentialContainer[]>();
-  const [key, setKey] = useState(0);
+  const [selectedIds, setSelectedIds] = useState<Record<string, string>>({});
 
-  usePromise((signal) => getCredentials({ signal, context }), setCredentials, [
-    key,
-  ]);
+  usePromise((signal) => getCredentials({ signal, context }), setCredentials, []);
 
   const credentialRowCells = (
     credMetadata: CredentialMetadataRepresentation,
@@ -305,11 +303,13 @@ export const SigningIn = () => {
                   </span>
                   <FormSelect
                     aria-label={t("defaultToUse")}
-                    value={credentialsInCategory[0].credential.id}
+                    value={
+                      selectedIds[category] ??
+                      credentialsInCategory[0].credential.id
+                    }
                     onChange={async (_event, id) => {
-                      if (id === credentialsInCategory[0].credential.id) return;
                       await moveCredentialToFirst(context, id);
-                      setKey((k) => k + 1);
+                      setSelectedIds((prev) => ({ ...prev, [category]: id }));
                     }}
                     style={{ width: "auto" }}
                     data-testid={`${category}/default-select`}
